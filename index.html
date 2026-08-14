@@ -25,7 +25,7 @@
   }
   header{
     max-width:640px;
-    margin:0 auto 20px;
+    margin:0 auto 16px;
   }
   h1{
     font-size:20px;
@@ -36,6 +36,39 @@
     margin:0;
     color:var(--sub);
     font-size:13px;
+  }
+  .filter-bar{
+    max-width:640px;
+    margin:0 auto 20px;
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .chip{
+    border:1px solid var(--line);
+    background:var(--card);
+    color:var(--sub);
+    font-size:13px;
+    font-weight:600;
+    padding:7px 14px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .chip.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+  .section-heading{
+    max-width:640px;
+    margin:20px auto 8px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--sub);
+    letter-spacing:0.04em;
+  }
+  .section-heading:first-of-type{
+    margin-top:0;
   }
   .list{
     max-width:640px;
@@ -89,90 +122,156 @@
     background:var(--accent);
     color:#fff;
   }
-  .copy-all{
-    max-width:640px;
-    margin:0 auto 16px;
-    display:flex;
-    justify-content:flex-end;
-  }
-  .copy-all button{
-    border:1px solid var(--line);
-    background:var(--card);
-    color:var(--ink);
-    font-size:13px;
-    padding:8px 14px;
-    border-radius:8px;
-    cursor:pointer;
-  }
 </style>
 </head>
 <body>
 
 <header>
   <h1>門市 ID 快速複製</h1>
-  <p class="hint">點右側按鈕即可複製該筆 ID</p>
+  <p class="hint">點右側按鈕即可複製該筆 ID（含 @）</p>
 </header>
 
+<div class="filter-bar" id="filterBar"></div>
 <div class="list" id="list"></div>
 
 <script>
-const data = [
-  ["高雄左營", "obz8096L"],
-  ["高雄夢時代", "ott3541o"],
-  ["高雄巨蛋", "ldh6278d"],
-  ["高雄漢神百貨", "897upgfr"],
-  ["Funbox 高雄大立店", "917hatdy"],
-  ["Funbox 高雄義享店", "777nkbeo"],
-  ["來玩聚－鳳山店", "189yvcce"],
-  ["來玩聚－新楠店", "022itqlw"],
-  ["來玩聚－楠梓店", "241cmnww"],
-  ["來玩聚－新屏店", "308oaews"],
-  ["屏東環球", "xhi2668e"],
-  ["屏東太平洋", "ess7711t"],
-  ["Funbox 義大 2 館", "bxd6822t"],
-  ["高雄sogo店", "845nallq"],
-  ["台南南紡購物中心", "msq0107x"],
-  ["台南遠百店", "373rxyat"],
-  ["台南三井", "212isujx"]
-];
+const data = {
+  "北部": [
+    ["新北中和環球", "zgq9395a"],
+    ["新竹遠雄", "agl4214l"],
+    ["新北樹林秀泰", "046txnme"],
+    ["新竹頑東", "882rfnmr"],
+    ["新北比漾廣場", "ufq5307a"],
+    ["竹北遠東", "642vdyvq"],
+    ["新北宏匯廣場", "513vgbqo"],
+    ["新竹巨城", "532otwmb"],
+    ["美麗華", "660hextn"],
+    ["南港 LaLaport", "924ngwfb"],
+    ["桃園新光三越站前", "fcm1241y"],
+    ["台北忠孝sogo店", "lcn7452p"],
+    ["桃園環球 A19", "403qwxdn"]
+  ],
+  "中部": [
+    ["新光三越台中", "833rhkmr"],
+    ["來玩聚－員林店", "958tzuco"],
+    ["台中港三井", "816xpruh"],
+    ["來玩聚－斗六店", "rsp8657s"],
+    ["豐原太平洋", "094mvrhb"],
+    ["台中 LaLaport", "620dfrfm"],
+    ["文心秀泰", "605dilqq"],
+    ["嘉義耐斯", "121vsddw"],
+    ["台中遠東", "hdg3289a"],
+    ["嘉義三越", "zhj4962p"],
+    ["台中廣三 SOGO", "526bsjmh"],
+    ["漢神洲際", "218xxrbx"],
+    ["台中中友", "815dstuy"],
+    ["彰化來玩聚", "766sgllj"]
+  ],
+  "南部": [
+    ["高雄左營", "obz8096L"],
+    ["來玩聚－新屏店", "308oaews"],
+    ["高雄夢時代", "ott3541o"],
+    ["屏東環球", "xhi2668e"],
+    ["高雄巨蛋", "ldh6278d"],
+    ["屏東太平洋", "ess7711t"],
+    ["高雄漢神百貨", "897upgfr"],
+    ["Funbox 義大 2 館", "bxd6822t"],
+    ["Funbox 高雄大立店", "917hatdy"],
+    ["高雄sogo店", "845nallq"],
+    ["Funbox 高雄義享店", "777nkbeo"],
+    ["台南南紡購物中心", "msq0107x"],
+    ["來玩聚－鳳山店", "189yvcce"],
+    ["台南遠百店", "373rxyat"],
+    ["來玩聚－新楠店", "022itqlw"],
+    ["台南三井", "212isujx"],
+    ["來玩聚－楠梓店", "241cmnww"]
+  ],
+  "東部": [
+    ["宜蘭新月廣場", "027iendl"],
+    ["花蓮店", "ymc0892z"]
+  ]
+};
 
 const list = document.getElementById('list');
+const filterBar = document.getElementById('filterBar');
 
-data.forEach(([name, id]) => {
-  const row = document.createElement('div');
-  row.className = 'row';
+const regions = Object.keys(data);
+let activeRegion = '全部';
 
-  const info = document.createElement('div');
-  info.className = 'info';
-  info.innerHTML = `<div class="name">${name}</div><div class="id">@${id}</div>`;
+function renderFilters() {
+  filterBar.innerHTML = '';
+  ['全部', ...regions].forEach(region => {
+    const chip = document.createElement('button');
+    chip.className = 'chip' + (region === activeRegion ? ' active' : '');
+    chip.textContent = region;
+    chip.addEventListener('click', () => {
+      activeRegion = region;
+      renderFilters();
+      renderList();
+    });
+    filterBar.appendChild(chip);
+  });
+}
 
-  const btn = document.createElement('button');
-  btn.className = 'copy-btn';
-  btn.textContent = '複製';
-  btn.addEventListener('click', async () => {
-    const textToCopy = '@' + id;
-    try {
-      await navigator.clipboard.writeText(textToCopy);
-    } catch (e) {
-      const ta = document.createElement('textarea');
-      ta.value = textToCopy;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-    }
+function copyId(id, btn) {
+  const textToCopy = '@' + id;
+  const done = () => {
     btn.textContent = '已複製';
     btn.classList.add('copied');
     setTimeout(() => {
       btn.textContent = '複製';
       btn.classList.remove('copied');
     }, 1200);
-  });
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(textToCopy).then(done).catch(() => fallbackCopy(textToCopy, done));
+  } else {
+    fallbackCopy(textToCopy, done);
+  }
+}
 
-  row.appendChild(info);
-  row.appendChild(btn);
-  list.appendChild(row);
-});
+function fallbackCopy(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  done();
+}
+
+function renderList() {
+  list.innerHTML = '';
+  const regionsToShow = activeRegion === '全部' ? regions : [activeRegion];
+
+  regionsToShow.forEach(region => {
+    const heading = document.createElement('div');
+    heading.className = 'section-heading';
+    heading.textContent = `${region}（${data[region].length}）`;
+    list.appendChild(heading);
+
+    data[region].forEach(([name, id]) => {
+      const row = document.createElement('div');
+      row.className = 'row';
+
+      const info = document.createElement('div');
+      info.className = 'info';
+      info.innerHTML = `<div class="name">${name}</div><div class="id">@${id}</div>`;
+
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = '複製';
+      btn.addEventListener('click', () => copyId(id, btn));
+
+      row.appendChild(info);
+      row.appendChild(btn);
+      list.appendChild(row);
+    });
+  });
+}
+
+renderFilters();
+renderList();
 </script>
 
 </body>
