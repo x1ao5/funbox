@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>門市 ID 快速複製</title>
+<style>
+  :root{
+    --bg:#f6f5f2;
+    --card:#ffffff;
+    --ink:#1f1e1c;
+    --sub:#6f6b63;
+    --line:#e7e4dd;
+    --accent:#2f6f5e;
+    --accent-soft:#e6f0ec;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;
+    padding:24px 16px 60px;
+  }
+  header{
+    max-width:640px;
+    margin:0 auto 20px;
+  }
+  h1{
+    font-size:20px;
+    margin:0 0 4px;
+    letter-spacing:0.02em;
+  }
+  p.hint{
+    margin:0;
+    color:var(--sub);
+    font-size:13px;
+  }
+  .list{
+    max-width:640px;
+    margin:0 auto;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .row{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .info{
+    min-width:0;
+  }
+  .name{
+    font-size:14.5px;
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .id{
+    font-size:12.5px;
+    color:var(--sub);
+    font-family:"SF Mono",Menlo,Consolas,monospace;
+    margin-top:2px;
+  }
+  button.copy-btn{
+    flex:none;
+    border:none;
+    background:var(--accent-soft);
+    color:var(--accent);
+    font-size:13px;
+    font-weight:600;
+    padding:8px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:background 0.15s ease, transform 0.1s ease;
+  }
+  button.copy-btn:active{
+    transform:scale(0.96);
+  }
+  button.copy-btn.copied{
+    background:var(--accent);
+    color:#fff;
+  }
+  .copy-all{
+    max-width:640px;
+    margin:0 auto 16px;
+    display:flex;
+    justify-content:flex-end;
+  }
+  .copy-all button{
+    border:1px solid var(--line);
+    background:var(--card);
+    color:var(--ink);
+    font-size:13px;
+    padding:8px 14px;
+    border-radius:8px;
+    cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>門市 ID 快速複製</h1>
+  <p class="hint">點右側按鈕即可複製該筆 ID</p>
+</header>
+
+<div class="list" id="list"></div>
+
+<script>
+const data = [
+  ["高雄左營", "obz8096L"],
+  ["高雄夢時代", "ott3541o"],
+  ["高雄巨蛋", "ldh6278d"],
+  ["高雄漢神百貨", "897upgfr"],
+  ["Funbox 高雄大立店", "917hatdy"],
+  ["Funbox 高雄義享店", "777nkbeo"],
+  ["來玩聚－鳳山店", "189yvcce"],
+  ["來玩聚－新楠店", "022itqlw"],
+  ["來玩聚－楠梓店", "241cmnww"],
+  ["來玩聚－新屏店", "308oaews"],
+  ["屏東環球", "xhi2668e"],
+  ["屏東太平洋", "ess7711t"],
+  ["Funbox 義大 2 館", "bxd6822t"],
+  ["高雄sogo店", "845nallq"],
+  ["台南南紡購物中心", "msq0107x"],
+  ["台南遠百店", "373rxyat"],
+  ["台南三井", "212isujx"]
+];
+
+const list = document.getElementById('list');
+
+data.forEach(([name, id]) => {
+  const row = document.createElement('div');
+  row.className = 'row';
+
+  const info = document.createElement('div');
+  info.className = 'info';
+  info.innerHTML = `<div class="name">${name}</div><div class="id">@${id}</div>`;
+
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = '複製';
+  btn.addEventListener('click', async () => {
+    const textToCopy = '@' + id;
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = textToCopy;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    btn.textContent = '已複製';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '複製';
+      btn.classList.remove('copied');
+    }, 1200);
+  });
+
+  row.appendChild(info);
+  row.appendChild(btn);
+  list.appendChild(row);
+});
+</script>
+
+</body>
+</html>
